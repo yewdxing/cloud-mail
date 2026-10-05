@@ -64,7 +64,7 @@ function changeTimeSort() {
 }
 
 function jumpContent(email) {
-  emailStore.contentData.email = email
+  emailStore.contentData.email = emailStore.toContentEmail(email)
   emailStore.contentData.delType = 'logic'
   emailStore.contentData.showUnread = true
   emailStore.contentData.showStar = true
@@ -101,6 +101,7 @@ async function latest() {
         //确保请求回来后，账号没有切换，时间排序没有改变，全部邮件类型没变
         if (accountId === accountStore.currentAccountId && params.timeSort === curTimeSort && allReceive === accountStore.currentAccount.allReceive) {
           if (list.length > 0) {
+            emailStore.applyFullList(list)
 
             for (let email of list) {
 
@@ -141,7 +142,9 @@ function cancelStar(email) {
 function getEmailList(emailId, size) {
   const accountId =  accountStore.currentAccountId;
   const allReceive = accountStore.currentAccount.allReceive;
-  return emailList(accountId, allReceive, emailId, params.timeSort, size, 0).then(data => {
+  return emailStore.fetchList(full =>
+    emailList(accountId, allReceive, emailId, params.timeSort, size, 0, full)
+  ).then(data => {
     data.latestEmail.reqAccountId = accountId;
     data.latestEmail.allReceive = allReceive;
     return data;
